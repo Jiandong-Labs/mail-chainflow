@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: mail-chainflow
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: mjd507@qq.com
+    password: ${mail_authorization_code}
+    protocol: smtp
+    ssl:
+      enabled: true
+    properties:
+      "[mail.smtp.connectiontimeout]": 5000
+      "[mail.smtp.timeout]": 3000
+      "[mail.smtp.writetimeout]": 5000
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.2:3b
+          temperature: 0.7
+
+inbound-mail:
+  host: imap.qq.com
+  port: 993
+  username: mjd507@qq.com
+  password: ${mail_authorization_code}
+  protocol: imaps
+
+mail-chainflow:
+  resolve.prompt: "You are a strict policy engine. Based on the ticket category, determine the resolution.
+    - If DELIVERY or TECHNICAL: Offer the customer a replacement.
+    - If BILLING: Enforce the '50 feet or 50 seconds' policy. Reject the request and explain that no
+        refunds are provided for billing inquiries.
+    Ticket Category: %s\
+    Original Email: %s\
+    Output the exact action to take and the internal reasoning."
+
+  classify.prompt: "Analyze the following email. Determine if it is a customer support ticket.
+    If yes, classify the issue strictly as BILLING, DELIVERY, or TECHNICAL.
+    If it is not a support ticket (e.g., spam, newsletter, internal), classify it as IGNORED.
+    
+    Email Body: 
+    %s"
+
+  draft.prompt: "You are a customer support representative. Draft a polite, empathetic email reply to the customer.
+    Use the original email for context.
+    Apply the following resolution strictly: %s
+    Do not invent new policies. Keep the tone professional but warm. Sign off as 'Automated Support Team'.
+  
+    Original Email: %s"
